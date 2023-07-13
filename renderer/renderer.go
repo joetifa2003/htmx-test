@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/tdewolff/minify/v2"
+	"github.com/tdewolff/minify/v2/css"
 	"github.com/tdewolff/minify/v2/html"
 )
 
@@ -36,6 +37,7 @@ type layoutData struct {
 func (t *Renderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	m := minify.New()
 	m.AddFunc("text/html", html.Minify)
+	m.AddFunc("text/css", css.Minify)
 	mw := m.Writer("text/html", w)
 
 	defer func() {
