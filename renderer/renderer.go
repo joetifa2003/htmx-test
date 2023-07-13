@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/tdewolff/minify/v2"
+	"github.com/tdewolff/minify/v2/html"
 )
 
 //go:embed assets/*
@@ -32,6 +34,16 @@ type layoutData struct {
 }
 
 func (t *Renderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	m := minify.New()
+	m.AddFunc("text/html", html.Minify)
+	mw := m.Writer("text/html", w)
+
+	defer func() {
+		if err := mw.Close(); err != nil {
+			c.Logger().Error(err)
+		}
+	}()
+
 	switch r := data.(type) {
 	case RenderPage:
 		var viewContent strings.Builder
@@ -40,12 +52,12 @@ func (t *Renderer) Render(w io.Writer, name string, data interface{}, c echo.Con
 			return err
 		}
 
-		return t.ExecuteTemplate(w, r.Layout, layoutData{
+		return t.ExecuteTemplate(mw, r.Layout, layoutData{
 			Title:   r.Title,
 			Content: template.HTML(viewContent.String()),
 		})
 	case RenderWidget:
-		return t.ExecuteTemplate(w, name, r.Data)
+		return t.ExecuteTemplate(mw, name, r.Data)
 	}
 
 	panic("bro why are you here")
