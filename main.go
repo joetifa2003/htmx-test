@@ -30,12 +30,16 @@ func main() {
 		}
 		countInt++
 
-		return c.Render(http.StatusOK, "counter", countInt)
+		return c.Render(http.StatusOK, "counter", renderer.RenderWidget{Data: countInt})
 	})
 
 	// for the main page
 	e.GET("/", func(c echo.Context) error {
-		return c.Render(http.StatusOK, "index.html", nil)
+		return c.Render(http.StatusOK, "index.html", renderer.RenderPage{Title: "Hi welcome", Layout: "main-layout"})
+	})
+
+	e.GET("/about", func(c echo.Context) error {
+		return c.Render(http.StatusOK, "about.html", renderer.RenderPage{Title: "About", Layout: "main-layout"})
 	})
 
 	e.Logger.Fatal(e.Start(":1323"))
