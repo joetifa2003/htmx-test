@@ -1,0 +1,7 @@
+{{define "counter"}}
+<form hx-post="/counter" hx-swap="outerHTML">
+  <input type="hidden" name="count" value="{{ . }}" />
+  <button type="submit">Click Me {{ . }}</button>
+</form>
+{{end}}
+
