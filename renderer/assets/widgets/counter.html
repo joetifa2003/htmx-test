@@ -1,7 +1,13 @@
 {{define "counter"}}
-<form hx-post="/counter" hx-swap="outerHTML">
+<form hx-post="/counter" hx-swap="outerHTML" class="flex flex-col" hx-ext="disable-element" hx-disable-element="#count-submit">
   <input type="hidden" name="count" value="{{ . }}" />
-  <button type="submit">Click Me {{ . }}</button>
+  <button id="count-submit" type="submit" class="btn btn-primary" >
+    <span class="loading loading-spinner htmx-indicator"></span> Click Me {{ . }}
+  </button>
+
+  {{if gt . 0}}
+    <p>You did it, good job 🎉</p>
+    <p>No javascript here! Check the network tab.</p>
+  {{end}}
 </form>
 {{end}}
-

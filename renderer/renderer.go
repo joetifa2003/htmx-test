@@ -13,20 +13,23 @@ import (
 )
 
 //go:embed assets/*
-var templates embed.FS
+var Assets embed.FS
 
 type Renderer struct {
 	*template.Template
-}
 
-type RenderPage struct {
-	Title  string
-	Layout string
-	Data   interface{}
+	defaultLayout string
 }
 
 type RenderWidget struct {
 	Data interface{}
+}
+
+type RenderPage struct {
+	RenderWidget
+
+	Title  string
+	Layout string
 }
 
 type layoutData struct {
@@ -36,7 +39,9 @@ type layoutData struct {
 
 func (t *Renderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	m := minify.New()
-	m.AddFunc("text/html", html.Minify)
+	m.Add("text/html", &html.Minifier{
+		KeepDefaultAttrVals: true,
+	})
 	m.AddFunc("text/css", css.Minify)
 	mw := m.Writer("text/html", w)
 
@@ -54,7 +59,12 @@ func (t *Renderer) Render(w io.Writer, name string, data interface{}, c echo.Con
 			return err
 		}
 
-		return t.ExecuteTemplate(mw, r.Layout, layoutData{
+		layout := r.Layout
+		if layout == "" {
+			layout = t.defaultLayout
+		}
+
+		return t.ExecuteTemplate(mw, layout, layoutData{
 			Title:   r.Title,
 			Content: template.HTML(viewContent.String()),
 		})
@@ -62,11 +72,12 @@ func (t *Renderer) Render(w io.Writer, name string, data interface{}, c echo.Con
 		return t.ExecuteTemplate(mw, name, r.Data)
 	}
 
-	panic("bro why are you here")
+	panic("should pass RenderPage or RenderWidget structs to the data parameter")
 }
 
-func NewRenderer() *Renderer {
+func NewRenderer(defaultLayout string) *Renderer {
 	return &Renderer{
-		template.Must(template.ParseFS(templates, "assets/**/*.html")),
+		Template:      template.Must(template.ParseFS(Assets, "assets/**/*.html")),
+		defaultLayout: defaultLayout,
 	}
 }

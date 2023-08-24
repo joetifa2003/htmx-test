@@ -1,0 +1,21 @@
+version: "3"
+
+tasks:
+  build-tailwind:
+    sources:
+      - renderer/assets/layouts/**/*.html
+      - renderer/assets/pages/**/*.html
+      - renderer/assets/widgets/**/*.html
+      - renderer/npm/styles/tailwind.css
+    cmds:
+      - cd renderer/npm && npx tailwindcss -i ./styles/tailwind.css -o ../assets/styles/main.css
+  build-go:
+    deps:
+      - build-tailwind
+    cmds:
+      - go build .
+  run-server:
+    deps:
+      - build-go
+    cmds:
+      - ./htmx-test

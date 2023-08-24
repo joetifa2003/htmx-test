@@ -1,0 +1,7 @@
+<div x-data="{ open: false }">
+  <button @click="open = !open">Toggle</button>
+  <div x-data="{ label: 'Content:' }">
+    <span x-text="label"></span>
+    <span x-show="open">hi</span>
+  </div>
+</div>

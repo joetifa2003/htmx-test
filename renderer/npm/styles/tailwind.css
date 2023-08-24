@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.htmx-indicator {
+  display: none !important;
+}
+.htmx-request .htmx-indicator {
+  display: inline !important ;
+}
+.htmx-request.htmx-indicator {
+  display: inline !important;
+}
+
+.htmx-request button[type="submit"] {
+  @apply btn-disabled;
+}
