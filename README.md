@@ -7,6 +7,7 @@ assets are embedded into the go binary
 # Setup
 
 ```
+go install github.com/a-h/templ/cmd/templ@latest # for code generation
 cd renderer/npm
 npm install
 ```
