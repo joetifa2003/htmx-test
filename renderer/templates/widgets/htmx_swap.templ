@@ -1,0 +1,7 @@
+package widgets
+
+templ HtmxSwap(id string, content templ.Component) {
+  <div id={ id } hx-swap-oob="true">
+    {! content }
+  </div>
+}

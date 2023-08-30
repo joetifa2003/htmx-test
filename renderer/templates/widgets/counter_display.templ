@@ -1,0 +1,11 @@
+package widgets
+
+import (
+  "fmt"
+)
+
+templ CounterDisplay(count int) {
+  <div id="counter-display">
+    { fmt.Sprint(count) }
+  </div>
+}

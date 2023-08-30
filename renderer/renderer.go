@@ -2,82 +2,42 @@ package renderer
 
 import (
 	"embed"
-	"html/template"
-	"io"
-	"strings"
 
+	"github.com/a-h/templ"
+	"github.com/joetifa2003/htmx-test/renderer/templates/widgets"
 	"github.com/labstack/echo/v4"
-	"github.com/tdewolff/minify/v2"
-	"github.com/tdewolff/minify/v2/css"
-	"github.com/tdewolff/minify/v2/html"
 )
 
 //go:embed assets/*
 var Assets embed.FS
 
-type Renderer struct {
-	*template.Template
-
-	defaultLayout string
+type customWidget struct {
+	id     string
+	widget templ.Component
 }
 
-type RenderWidget struct {
-	Data interface{}
+type Render struct {
+	Component     templ.Component
+	customWidgets []customWidget
 }
 
-type RenderPage struct {
-	RenderWidget
-
-	Title  string
-	Layout string
-}
-
-type layoutData struct {
-	Title   string
-	Content template.HTML
-}
-
-func (t *Renderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	m := minify.New()
-	m.Add("text/html", &html.Minifier{
-		KeepDefaultAttrVals: true,
+func (t *Render) AddCustomWidget(id string, widget templ.Component) {
+	t.customWidgets = append(t.customWidgets, customWidget{
+		id:     id,
+		widget: widget,
 	})
-	m.AddFunc("text/css", css.Minify)
-	mw := m.Writer("text/html", w)
+}
 
-	defer func() {
-		if err := mw.Close(); err != nil {
-			c.Logger().Error(err)
-		}
-	}()
+func (t *Render) Render(c echo.Context) error {
+	ctx := c.Request().Context()
+	w := c.Response().Writer
+	for _, v := range t.customWidgets {
+		err := widgets.HtmxSwap(v.id, v.widget).Render(ctx, w)
 
-	switch r := data.(type) {
-	case RenderPage:
-		var viewContent strings.Builder
-		err := t.ExecuteTemplate(&viewContent, name, r.Data)
 		if err != nil {
 			return err
 		}
-
-		layout := r.Layout
-		if layout == "" {
-			layout = t.defaultLayout
-		}
-
-		return t.ExecuteTemplate(mw, layout, layoutData{
-			Title:   r.Title,
-			Content: template.HTML(viewContent.String()),
-		})
-	case RenderWidget:
-		return t.ExecuteTemplate(mw, name, r.Data)
 	}
 
-	panic("should pass RenderPage or RenderWidget structs to the data parameter")
-}
-
-func NewRenderer(defaultLayout string) *Renderer {
-	return &Renderer{
-		Template:      template.Must(template.ParseFS(Assets, "assets/**/*.html")),
-		defaultLayout: defaultLayout,
-	}
+	return t.Component.Render(ctx, w)
 }

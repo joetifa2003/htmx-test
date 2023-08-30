@@ -1,19 +1,27 @@
 version: "3"
 
 tasks:
+  build-templates:
+    sources:
+      - renderer/templates/**/*.templ
+    cmds:
+      - templ generate
+
   build-tailwind:
     sources:
-      - renderer/assets/layouts/**/*.html
-      - renderer/assets/pages/**/*.html
-      - renderer/assets/widgets/**/*.html
+      - renderer/templates/**/*.templ
       - renderer/npm/styles/tailwind.css
+    deps:
+      - build-templates
     cmds:
       - cd renderer/npm && npx tailwindcss -i ./styles/tailwind.css -o ../assets/styles/main.css
+
   build-go:
     deps:
       - build-tailwind
     cmds:
       - go build .
+
   run-server:
     deps:
       - build-go

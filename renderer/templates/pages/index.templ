@@ -1,0 +1,12 @@
+package pages
+
+import (
+  "github.com/joetifa2003/htmx-test/renderer/templates/widgets"
+)
+
+templ IndexPage() {
+  @widgets.Counter(0)
+  <div id="counter-display-wrapper">
+    @widgets.CounterDisplay(0)
+  </div>
+}
